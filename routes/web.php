@@ -13,6 +13,8 @@
 use App\Account;
 use Illuminate\Support\Facades\DB;
 use App\User;
+use Illuminate\Support\Str;
+
 
 use function PHPSTORM_META\type;
 
@@ -441,4 +443,134 @@ Route::get('/skip-take', function () {
         ->get();
     // dd(DB::getQueryLog());
     return $users;
+});
+
+//Conditional Clauses
+Route::get('/conditional', function () {
+    $user_id = 0;
+
+    $users = DB::table('accounts')
+        ->when($user_id, function ($query, $user_id) {
+            return $query->where('user_id', $user_id);
+        })
+        ->get();
+    // $sortBy = '';
+
+    // $users = DB::table('users')
+    //     ->when($sortBy, function ($query, $sortBy) {
+    //         return $query->orderBy($sortBy);
+    //     }, function ($query) {
+    //         return $query->orderBy('name');
+    //     })
+    //     ->get();
+    // dd(DB::getQueryLog());
+    return $users;
+});
+
+//Inserts
+Route::get('/insert', function () {
+    DB::table('users')->insert(
+        [
+            'name' => 'zawzaw',
+            'email' => 'zawzaw@gmail.com',
+            'email_verified_at' => now(),
+            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'remember_token' => Str::random(10),
+
+        ]
+    );
+    // dd(DB::getQueryLog());
+    return "Created";
+});
+//MultiInserts 
+Route::get('/multiinsert', function () {
+    DB::table('users')->insert(
+        [
+            [
+                'name' => 'naung',
+                'email' => 'naung@gmail.com',
+                'email_verified_at' => now(),
+                'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+                'remember_token' => Str::random(10),
+
+            ],
+            [
+                'name' => 'mgmg',
+                'email' => 'mgmg@gmail.com',
+                'email_verified_at' => now(),
+                'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+                'remember_token' => Str::random(10),
+
+            ]
+        ]
+    );
+    // dd(DB::getQueryLog());
+    return "Created";
+});
+
+//Insert Ignore
+Route::get('/insertignore', function () {
+    DB::table('users')->insertOrIgnore(
+        [
+            [
+                'name' => 'naung',
+                'email' => 'naung@gmail.com',
+                'email_verified_at' => now(),
+                'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+                'remember_token' => Str::random(10),
+
+            ],
+            [
+                'name' => 'mgmg',
+                'email' => 'mgmg@gmail.com',
+                'email_verified_at' => now(),
+                'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+                'remember_token' => Str::random(10),
+
+            ]
+        ]
+    );
+    dd(DB::getQueryLog());
+    return "Created";
+});
+
+//Insert AutoIncrement and get Id
+Route::get('/insertincrement', function () {
+    $id = DB::table('users')->insertGetId(
+        [
+            'name' => 'aung',
+            'email' => 'aung@gmail.com',
+            'email_verified_at' => now(),
+            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'remember_token' => Str::random(10),
+
+        ]
+    );
+    // dd(DB::getQueryLog());
+    return $id;
+});
+
+
+//Update
+Route::get('/update', function () {
+    $affected = DB::table('users')
+        ->where('id', 3)
+        ->update(['amount' => 10]);
+    // dd(DB::getQueryLog());
+    return $affected;
+});
+
+//Pesssimitic Locking
+
+Route::get('/lock', function () {
+    DB::table('users')->where('amount', '>', 1)->sharedLock()->get();
+    // return DB::table('users')->where('amount', '>', 0)->lockForUpdate()->get();
+    dd(DB::getQueryLog());
+}); //I don't know
+
+//Debugging
+Route::get('/debug', function () {
+    // DB::table('users')->where('amount', '>', 0)->dd();
+
+    DB::table('users')->where('amount', '>', 0)->dump();
 });
