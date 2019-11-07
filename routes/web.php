@@ -225,7 +225,7 @@ Route::get('/subquery', function () {
         ->joinSub($posts, 'posts', function ($join) {
             $join->on('users.id', '=', 'posts.user_id');
         })->get();
-    dd(DB::getQueryLog());
+    // dd(DB::getQueryLog());
     return $users;
 });
 
@@ -239,5 +239,206 @@ Route::get('/unions', function () {
         ->where('active', 1)
         ->union($first)
         ->get();
+    return $users;
+});
+
+//OrWhere Clauses
+Route::get('/orwhere', function () {
+    $users = DB::table('users')
+        ->where('id', '>', 10)
+        ->orWhere('active', '1')
+        ->get();
+    return $users;
+});
+
+//WhereBetween
+Route::get('/wherebetween', function () {
+    $users = DB::table('users')
+        ->whereBetween('id', [10, 15])
+        ->get();
+    return $users;
+});
+
+//WhereBetween
+Route::get('/wherenotbetween', function () {
+    $users = DB::table('users')
+        ->whereNotBetween('id', [10, 15])
+        ->get();
+    return $users;
+});
+
+// whereIn// orWhereIn 
+Route::get('/wherein', function () {
+    $users = DB::table('accounts')
+        ->whereIn('user_id', [1, 2, 3])
+        ->orWhereIn('user_id', [6, 7, 8])
+        ->get();
+
+    return $users;
+});
+
+// whereNotIn // orWhereNotIn
+Route::get('/wherenotin', function () {
+    $users = DB::table('accounts')
+        ->whereNotIn('user_id', [1, 2, 3])
+        ->orWhereNotIn('user_id', [1, 2, 4])
+        ->get();
+
+    return $users;
+});
+// whereNull / whereNotNull / orWhereNull / orWhereNotNull
+
+Route::get('/whereNull', function () {
+    $users = DB::table('users')
+        ->whereNull('created_at')
+        ->orWhereNull('updated_at')
+        ->get();
+    return $users;
+});
+Route::get('/wherenotnull', function () {
+    $users = DB::table('users')
+        ->whereNotNull('created_at')
+        ->orWhereNotNull('updated_at')
+        ->get();
+
+    return $users;
+});
+
+//whereDate / whereMonth / whereDay / whereYear / whereTime
+Route::get('/wheredate', function () {
+    // $users = DB::table('users')
+    //     ->whereDate('created_at', '2019-11-07 ')
+    //     ->get();
+
+    // $users = DB::table('users')
+    //     ->whereMonth('created_at', '10')
+    //     ->get();
+
+    // $users = DB::table('users')
+    //     ->whereDay('created_at', '8')
+    //     ->get();
+
+    // $users = DB::table('users')
+    //     ->whereYear('created_at', '2020')
+    //     ->get();
+
+    $users = DB::table('users')
+        ->whereTime('created_at', '=', '11:20:45')
+        ->get();
+
+    return $users;
+});
+
+// whereColumn / orWhereColumn
+
+Route::get('/wherecolumn', function () {
+
+
+    // $users = DB::table('users')
+    //     ->whereColumn('active', 'amount')
+    //     ->get();
+
+    // $users = DB::table('users')
+    //     ->whereColumn('active', '>', 'amount')
+    //     ->get();
+
+    $users = DB::table('users')
+        ->whereColumn([
+            ['active', '!=', 'amount'],
+            ['created_at', '>', 'updated_at'],
+        ])->get();
+
+    return $users;
+});
+
+//Parameter Grouping
+Route::get('/whereadvanced', function () {
+    $users = DB::table('users')
+        ->where('name', '=', 'John')
+        ->where(function ($query) {
+            $query->where('active', '>', 0)
+                ->orWhere('id', '=', 5);
+        })
+        ->get();
+    // dd(DB::getQueryLog());
+    return $users;
+});
+
+//Where Exists Clauses
+Route::get('/whereexist', function () {
+    $users = DB::table('users')
+        ->whereExists(function ($query) {
+            $query->select(DB::raw(1))
+                ->from('accounts')
+                ->whereRaw('accounts.user_id = users.id');
+        })
+        ->get();
+    // dd(DB::getQueryLog());
+    return $users;
+});
+
+/*
+|--------------------------------------------------------------------------
+| JSON Where Clauses
+|--------------------------------------------------------------------------
+|
+| Laravel also supports querying JSON column types on databases that provide 
+|support for JSON column types.
+|LEARNING https://laravel.com/docs/6.x/queries#json-where-clauses
+|
+*/
+
+//Ordering, Grouping, Limit, & Offset
+Route::get('/ordering', function () {
+    $users = DB::table('users')
+        ->orderBy('id', 'desc')
+        ->get();
+    // dd(DB::getQueryLog());
+    return $users;
+});
+Route::get('/groupping', function () {
+    $accounts = DB::table('accounts')
+        ->groupBy('user_id')
+        ->get();
+    // dd(DB::getQueryLog());
+    return $accounts;
+});
+
+//latest / oldest
+Route::get('/last', function () {
+    $user = DB::table('users')
+        ->oldest()
+        ->get();
+    dd(DB::getQueryLog());
+    return $user;
+});
+
+//inRandomOrder
+Route::get('/randomorder', function () {
+    $users = DB::table('users')
+        ->inRandomOrder()
+        ->get();
+    // dd(DB::getQueryLog());
+    return $users;
+});
+
+//groupBy / having
+Route::get('/grouphaving', function () {
+    $users = DB::table('accounts')
+        ->groupBy('user_id', 'created_at')
+        ->having('user_id', '>', 10)
+        ->get();
+    // dd(DB::getQueryLog());
+    return $users;
+});
+
+//skip = offset / take = limit
+Route::get('/skip-take', function () {
+    // $users = DB::table('users')->skip(10)->take(5)->get();
+    $users = DB::table('users')
+        ->offset(10)
+        ->limit(5)
+        ->get();
+    // dd(DB::getQueryLog());
     return $users;
 });
