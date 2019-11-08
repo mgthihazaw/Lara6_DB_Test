@@ -563,9 +563,10 @@ Route::get('/update', function () {
 //Pesssimitic Locking
 
 Route::get('/lock', function () {
+
     DB::table('users')->where('amount', '>', 1)->sharedLock()->get();
     // return DB::table('users')->where('amount', '>', 0)->lockForUpdate()->get();
-    dd(DB::getQueryLog());
+    // dd(DB::getQueryLog());
 }); //I don't know
 
 //Debugging
@@ -573,4 +574,33 @@ Route::get('/debug', function () {
     // DB::table('users')->where('amount', '>', 0)->dd();
 
     DB::table('users')->where('amount', '>', 0)->dump();
+});
+
+/*
+|--------------------------------------------------------------------------
+| Paginate
+|--------------------------------------------------------------------------
+|
+|  Laravel's paginator is integrated with the query builder and Eloquent ORM and provides convenient, easy-to-use pagination of database results out of the box
+|
+*/
+
+//Paginated with groupBy
+Route::get('/paginate', function () {
+    // $users =  DB::table('users')->groupBy('name')->paginate(5);
+    // $users = DB::table('users')->simplePaginate(5);
+    $users = DB::table('users')->paginate(5);
+    // dd(DB::getQueryLog());
+    return $users;
+});
+//Customizing Url
+Route::get('/customize-url', function () {
+    $users = App\User::paginate(5);
+
+    // $users->withPath('customize-url'); //change custom url e.g http://localhost:8000/customize-url
+    //  $users->appends(['sort' => 'votes'])->links(); //e.g http://localhost:8000/customize-url ?sort=votes
+    // $users->fragment('start')->links();  //add fragment  e.g http://localhost:8000/customize-url#start
+    return   $users->onEachSide(5)->links();
+    // dd(DB::getQueryLog());
+    return $users;
 });
